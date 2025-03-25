@@ -1,0 +1,2 @@
+C:\Users\dubos\source\repos\discoData-playground\discodata-playground.client\obj\Debug\discodata-playground.client.esproj.CoreCompileInputs.cache
+c:\Users\dubos\_projects\dotnet\discoData-playground\discodata-playground.client\obj\Debug\discodata-playground.client.esproj.CoreCompileInputs.cache

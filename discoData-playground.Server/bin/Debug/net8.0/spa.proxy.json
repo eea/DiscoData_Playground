@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:56149",
+"RedirectUrl": "",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "c:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\discoData-playground.Server\\..\\discodata-playground.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

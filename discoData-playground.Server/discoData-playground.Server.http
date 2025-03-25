@@ -1,0 +1,6 @@
+@discoData_playground.Server_HostAddress = http://localhost:5150
+
+GET {{discoData_playground.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
