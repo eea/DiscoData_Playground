@@ -1,9 +1,9 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { fetchData } from "./services/discoDataApi";
+import { fetchData } from "../services/discoDataApi";
 import { SimpleTreeView } from "@mui/x-tree-view/SimpleTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
-import CustomTreeItem from "./custom/customTreeItem";
+import CustomTreeItem from "../custom/customTreeItem";
 import {
   FormControl,
   InputLabel,
@@ -38,6 +38,7 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
     try {
       setLoading(true);
       const result = await fetchData(`/getSchema/${origin}`); // Pass origin to the endpoint
+      console.log("Schema data:", result);
       setDremioSchema(result);
       setLoading(false);
     } catch (error) {

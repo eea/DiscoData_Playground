@@ -9,7 +9,7 @@ import child_process from 'child_process';
 import { env } from 'process';
 
 // const API_BASE_URL = "http://localhost:5243/";
-const API_BASE_URL = "http://jhpre01-w06.pdmz.eea:32243/";
+const API_BASE_URL = "https://restapi-internal.eea.europa.eu";
 const API_BASE_URL_AI = "http://127.0.0.1:5123";
 
 const baseFolder =
@@ -52,6 +52,13 @@ export default defineConfig({
     },
     server: {
         proxy: {
+            "/getCatalog/": {
+                target: API_BASE_URL,
+                changeOrigin: true,
+                rewrite: (path) => {
+                    return path.replace(/^\/getCatalog\/(.+)/, "/api/View/GetCatalog?userAdded=$1");
+                },
+            },
            "/getSchema/": {
                 target: API_BASE_URL,
                 changeOrigin: true,
@@ -73,6 +80,11 @@ export default defineConfig({
                     return path.replace(/^\/getColumn\/([^\/]+)\/([^\/]+)/, "/api/Dremio/GetColumn/$1/$2");
                 },
             },
+            '/testQuery': {
+                target: API_BASE_URL,
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/testQuery/, '/api/Dremio/testQuery'),
+              },
         },
         port: 56149,
         https: {
