@@ -3,6 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { postData } from "./services/discoDataApi";
+import { fetchData } from "./services/discoDataApi";
 import TreeViewModule from "./modules/treeViewModule";
 import ListViewModule from "./modules/listViewModule";
 import DialogView from "./modules/dialogView";
@@ -13,7 +14,6 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import {
     Button,
     LinearProgress,
-    TextareaAutosize
 } from '@mui/material';
 
 export default function App() {
@@ -32,6 +32,9 @@ export default function App() {
     const handleClose = () => setOpen(false);
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]); // State to keep track of selected columns
 
+     ////////////////////////////////////////////////
+    // Functions to handle tree item selection
+    ////////////////////////////////////////////////
     const handleTreeItemSelected = (item: { type: string; name: string; table?: string; schema?: string }) => {
         if (item.type === "table")
             setQuery(`SELECT * FROM "${item.schema}"."${item.name}" LIMIT 200`);
@@ -49,92 +52,9 @@ export default function App() {
         setSelectedItem(item);
     };
 
-    const handleViewItemSelected = (view: { queryString: string }) => {
-        setQuery(view.queryString);
-    }
-
-    const handleEditView = (view: any) => {
-        setSelectedView(view);
-        setOpen(true);
-        setEditMode(false);
-    };
-
-    const handleCreateView = (view: any) => {
-        setEditMode(true);
-        setSelectedView(view);
-        setOpen(true);
-    };
-
-    const handleSaveView = async (myView: any) => {
-        // Find the original view before editing
-        const originalView = userCatalog.find((view: any) => view.id === myView.id);
-
-        // 🛑 If the original view is not found, we have a new view to save
-        if (!originalView) {
-            try {
-                myView.userAdded = "dubos"; // Add userAdded field
-                await postData(`/createView/`, myView);
-                const response = await fetch("/getCatalog?userAdded=sdubos");
-                const updatedCatalog = await response.json(); // ✅ Convert response to JSON
-                setUserCatalog(updatedCatalog); // ✅ Correctly update the state
-            } catch (error) {
-                console.error("Error updating query:", error);
-            } finally {
-                setOpen(false);
-                return;
-            }
-        }
-
-        // 🛑 Check if anything changed before updating
-        if (JSON.stringify(originalView) === JSON.stringify(myView)) {
-            console.log("No changes detected, closing popup without update.");
-            setOpen(false);
-            return; // Exit without updating backend or refetching data
-        }
-
-        try {
-            await postData(`/updateView/${myView.id}`, myView); // Update backend
-
-            // 🔄 Fetch the latest catalog (to ensure full sync)
-            const response = await fetch("/getCatalog?userAdded=sdubos");
-            const updatedCatalog = await response.json(); // ✅ Convert to JSON
-            setUserCatalog(updatedCatalog); // ✅ Correctly update the state
-        } catch (error) {
-            console.error("Error updating query:", error);
-        } finally {
-            setOpen(false); // Close the popup
-        }
-    };
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedQuery(query);
-        }, 300); // Adjust delay as needed
-        return () => clearTimeout(handler);
-    }, [query]);
-
-    // Log query after debounce delay
-    useEffect(() => {
-        const tableName = extractTableName(debouncedQuery);
-        if (tableName) {
-            const fetchData = async () => {
-                const result = await postData(`/generateAiResponse/`, { "input_text": tableName });
-                if (result) {
-                    setSuggestedTable(result.output);
-                }
-                else {
-                    setSuggestedTable(null);
-                }
-            };
-            fetchData();
-        }
-    }, [debouncedQuery]);
-
-    const extractTableName = (sqlQuery: any) => {
-        const match = sqlQuery.match(/from\s+([`"'\[\]]?[\w]+[`"'\[\]]?)/i);
-        return match ? match[1] : null;
-    };
-
+     ////////////////////////////////////////////////
+    // Functions to handle run a query
+    ////////////////////////////////////////////////
     async function handleRunQuery() {
         if (!query.trim()) {
             return;
@@ -171,6 +91,108 @@ export default function App() {
         }
     }
 
+     ////////////////////////////////////////////////
+    // Functions to handle list view / create view
+    ////////////////////////////////////////////////
+    useEffect(() => {
+        const loadUserCatalog = async () => {
+            try {
+                const result = await fetchData(`/getCatalog/dubos`);
+                setUserCatalog(result);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+    
+        loadUserCatalog(); // Call the function directly
+    }, []);
+
+    const handleViewItemQuerySelected = (view: { query: string }) => {
+        setQuery(view.query);
+    }
+
+    const handleEditView = (view: any) => {
+        setSelectedView(view);
+        setOpen(true);
+        setEditMode(true);
+    };
+
+    const handleCreateView = (view: any) => {
+        setEditMode(true);
+        setSelectedView(view);
+        setOpen(true);
+    };
+
+    const handleSaveView = async (myView: any) => {
+        // Find the original view before editing
+        const originalView = userCatalog.find((view: any) => view.id === myView.id);
+
+        // 🛑 If the original view is not found, we have a new view to save
+        if (!originalView) {
+            try {
+                myView.userAdded = "dubos"; // Add userAdded field
+                await postData(`/createView`, myView); // ✅ Remove trailing slash
+
+                // 🔄 Update the local state directly without fetching
+                setUserCatalog((prevCatalog: any) => [...prevCatalog, myView]);
+            } catch (error) {
+                console.error("Error creating view:", error);
+            } finally {
+                setOpen(false);
+                return;
+            }
+        }
+
+        // 🛑 Check if anything changed before updating
+        if (JSON.stringify(originalView) === JSON.stringify(myView)) {
+            console.log("No changes detected, closing popup without update.");
+            setOpen(false);
+            return;
+        }
+
+        try {
+            await postData(`/updateView/${myView.id}`, myView); // ✅ Update backend
+
+            // 🔄 Update the local state directly without fetching
+            setUserCatalog((prevCatalog: any) =>
+                prevCatalog.map((view: any) => (view.id === myView.id ? myView : view))
+            );
+        } catch (error) {
+            console.error("Error updating view:", error);
+        } finally {
+            setOpen(false); // Close the popup
+        }
+    };
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(query);
+        }, 300); // Adjust delay as needed
+        return () => clearTimeout(handler);
+    }, [query]);
+
+    // Log query after debounce delay
+    useEffect(() => {
+        const tableName = extractTableName(debouncedQuery);
+        if (tableName) {
+            const fetchData = async () => {
+                const result = await postData(`/generateAiResponse/`, { "input_text": tableName });
+                if (result) {
+                    setSuggestedTable(result.output);
+                }
+                else {
+                    setSuggestedTable(null);
+                }
+            };
+            fetchData();
+        }
+    }, [debouncedQuery]);
+
+    const extractTableName = (sqlQuery: any) => {
+        const match = sqlQuery.match(/from\s+([`"'\[\]]?[\w]+[`"'\[\]]?)/i);
+        return match ? match[1] : null;
+    };
+
     const columns = queryResult.length > 0 ?
         Object.keys(queryResult[0]).map((key) => ({
             field: key,
@@ -178,6 +200,9 @@ export default function App() {
             flex: 1,
         })) : [];
 
+    ////////////////////////////////////////////////
+    // Functions to handle resizing playground area
+    ////////////////////////////////////////////////
     const handleMouseDown = () => {
         console.log("Mouse down");
         setIsDragging(true);
@@ -214,7 +239,6 @@ export default function App() {
         };
     }, [isDragging]);
 
-
     return (
         <div
             className="flex flex-col h-screen"
@@ -243,7 +267,7 @@ export default function App() {
                         <h1 className="text-lg font-bold text-gray-800 border-b border-gray-300 pb-2 mb-3 bg-gray-100">
                             Views
                         </h1>
-                        <ListViewModule onViewSelected={handleViewItemSelected} />
+                        <ListViewModule userCatalog={userCatalog} onQuerySelected={handleViewItemQuerySelected} onViewSelected={handleEditView} />
 
                     </div>
                 </div>
@@ -290,23 +314,22 @@ export default function App() {
                             className="mt-auto mr-2 ml-2 bg-white rounded-lg p-2 shadow-md"
                             style={{ height: `calc(100% - ${height + 40}px)` }} // Adjust for splitter height and padding
                         >  {isRunning && (<LinearProgress className="m-1" color="success" />)}
-                        
-                                <textarea style={{height:`100%`, width:"100%", resize:"none"}}
-                                    className="bg-white"
-                                    id="outlined-multiline-flexible"
-                                    placeholder="Enter your query..."
-                                    // minRows={2}      // Start with 2 rows
-                                    // maxRows={20}
-                                    value={query}
-                                    spellCheck={false}
-                                    onChange={(e) => setQuery(e.target.value)
-                                        // Prevent manual resize
-                                    }
-                                ></textarea>
 
-                 
+                            <textarea style={{ height: `100%`, width: "100%", resize: "none" }}
+                                className="bg-white"
+                                id="outlined-multiline-flexible"
+                                placeholder="Enter your query..."
+                                // minRows={2}      // Start with 2 rows
+                                // maxRows={20}
+                                value={query}
+                                spellCheck={false}
+                                onChange={(e) => setQuery(e.target.value)
+                                    // Prevent manual resize
+                                }
+                            ></textarea>
+
                             <div className="absolute bottom-12 right-15 flex" style={{ gap: '3px' }}>
-                                <Button onClick={handleRunQuery} variant="contained" size="small" startIcon={<PlayCircleOutlineIcon />}disabled={!query.trim() || isRunning}>
+                                <Button onClick={handleRunQuery} variant="contained" size="small" startIcon={<PlayCircleOutlineIcon />} disabled={!query.trim() || isRunning}>
                                     {isRunning ? "Running..." : "Run"}
                                 </Button>
                                 <Button variant="contained" onClick={() => handleCreateView({ query })} disabled={!query.trim() || isRunning} color="success" size="small" startIcon={<PostAddIcon />} >
@@ -316,7 +339,7 @@ export default function App() {
                                     AI
                                 </Button>
                             </div>
-                          
+
                         </div>
                         {/* Popup dialog to Edit/Save/Delete a View */}
                         <DialogView
@@ -326,9 +349,6 @@ export default function App() {
                             handleSave={handleSaveView}  // ✅ Pass handleSave to the popup
                             selectedView={selectedView}
                         />
-
-
-
                     </div>
                 </div>
             </div>

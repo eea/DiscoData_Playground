@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@mui/material";
 
-interface MyDialogProps {
+interface Props {
   open: boolean;
   editMode: boolean;
   handleClose: () => void;
@@ -24,7 +24,7 @@ interface MyDialogProps {
   };
 }
 
-const MyDialogView = ({ open, editMode, handleClose, handleSave, selectedView }: MyDialogProps) => {
+const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: Props) => {
   const [isEditMode, setIsEditMode] = useState(editMode);
   const [isUpdating, setIsUpdating] = useState(false);
   const [formValues, setFormValues] = useState(selectedView);
@@ -55,7 +55,7 @@ const MyDialogView = ({ open, editMode, handleClose, handleSave, selectedView }:
     if (!isEditMode) return;
 
     setIsUpdating(true);
-     // If not in edit mode, don't trigger a save
+    // If not in edit mode, don't trigger a save
 
 
     try {
@@ -88,6 +88,17 @@ const MyDialogView = ({ open, editMode, handleClose, handleSave, selectedView }:
                 required
                 value={formValues?.name || ""}
                 onChange={handleChange}
+              />
+              <TextField
+                fullWidth
+                margin="dense"
+                label="ID"
+                name="id"
+                disabled
+                value={formValues?.id || ""}
+                InputProps={{
+                  readOnly: true,
+                }}
               />
               <TextField
                 fullWidth
@@ -139,8 +150,8 @@ const MyDialogView = ({ open, editMode, handleClose, handleSave, selectedView }:
             </Button>
           ) : (
             <Button type="button" onClick={handleEditMode} color="primary">
-            Edit
-          </Button>
+              Edit
+            </Button>
           )}
         </DialogActions>
       </form>
@@ -148,4 +159,4 @@ const MyDialogView = ({ open, editMode, handleClose, handleSave, selectedView }:
   );
 };
 
-export default MyDialogView;
+export default DialogView;
