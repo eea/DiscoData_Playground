@@ -1,5 +1,4 @@
 "use client"; // Ensure it runs on client-side
-
 import React from "react";
 import { useEffect, useState } from "react";
 import { postData } from "./services/discoDataApi";
@@ -7,14 +6,12 @@ import { fetchData } from "./services/discoDataApi";
 import TreeViewModule from "./modules/treeViewModule";
 import ListViewModule from "./modules/listViewModule";
 import DialogView from "./modules/dialogView";
+import ChatGptViewModule from "./modules/chatGptViewModule";
 import { DataGrid } from '@mui/x-data-grid';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import {
-    Button,
-    LinearProgress,
-} from '@mui/material';
+import { Button, LinearProgress, IconButton, Tooltip } from '@mui/material';
 
 export default function App() {
     const [height, setHeight] = useState(700); // Initial height of the result area
@@ -26,13 +23,22 @@ export default function App() {
     const [suggestedTable, setSuggestedTable] = useState<string | null>(null);
     const [isRunning, setIsRunning] = useState<boolean>(false); // Loading state for button
     const [queryResult, setQueryResult] = useState<any[]>([]);
-    const [open, setOpen] = React.useState(false);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [isEditMode, setEditMode] = React.useState(false);
     const [selectedView, setSelectedView] = useState({ name: "", query: "", version: "", id: "", description: "" });
-    const handleClose = () => setOpen(false);
+    const [showRightColumn, setShowRightColumn] = useState(false);
+
+    const handleDialogClose = () => setIsDialogOpen(false);
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]); // State to keep track of selected columns
 
-     ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    // Functions to handlecall to chatGPT assistant
+    ////////////////////////////////////////////////
+    const handleOpenDialogAI = () => {
+        setShowRightColumn(prev => !prev);
+    };
+
+    ////////////////////////////////////////////////
     // Functions to handle tree item selection
     ////////////////////////////////////////////////
     const handleTreeItemSelected = (item: { type: string; name: string; table?: string; schema?: string }) => {
@@ -52,7 +58,7 @@ export default function App() {
         setSelectedItem(item);
     };
 
-     ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
     // Functions to handle run a query
     ////////////////////////////////////////////////
     async function handleRunQuery() {
@@ -91,7 +97,7 @@ export default function App() {
         }
     }
 
-     ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
     // Functions to handle list view / create view
     ////////////////////////////////////////////////
     useEffect(() => {
@@ -103,7 +109,7 @@ export default function App() {
                 console.error("Error fetching data:", error);
             }
         };
-    
+
         loadUserCatalog(); // Call the function directly
     }, []);
 
@@ -113,14 +119,14 @@ export default function App() {
 
     const handleEditView = (view: any) => {
         setSelectedView(view);
-        setOpen(true);
+        setIsDialogOpen(true);
         setEditMode(true);
     };
 
     const handleCreateView = (view: any) => {
         setEditMode(true);
         setSelectedView(view);
-        setOpen(true);
+        setIsDialogOpen(true);
     };
 
     const handleSaveView = async (myView: any) => {
@@ -131,14 +137,15 @@ export default function App() {
         if (!originalView) {
             try {
                 myView.userAdded = "dubos"; // Add userAdded field
-                await postData(`/createView`, myView); // ✅ Remove trailing slash
+                const createdView = await postData(`/createView`, myView); // ✅ Remove trailing slash
 
                 // 🔄 Update the local state directly without fetching
-                setUserCatalog((prevCatalog: any) => [...prevCatalog, myView]);
+                setUserCatalog((prevCatalog: any) => [createdView, ...prevCatalog]);
+
             } catch (error) {
                 console.error("Error creating view:", error);
             } finally {
-                setOpen(false);
+                setIsDialogOpen(false);
                 return;
             }
         }
@@ -146,7 +153,7 @@ export default function App() {
         // 🛑 Check if anything changed before updating
         if (JSON.stringify(originalView) === JSON.stringify(myView)) {
             console.log("No changes detected, closing popup without update.");
-            setOpen(false);
+            setIsDialogOpen(false);
             return;
         }
 
@@ -160,9 +167,10 @@ export default function App() {
         } catch (error) {
             console.error("Error updating view:", error);
         } finally {
-            setOpen(false); // Close the popup
+            setIsDialogOpen(false); // Close the popup
         }
     };
+
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -255,6 +263,7 @@ export default function App() {
             <div className="flex flex-1 h-[calc(100%-65px)]">
                 {/* Left Sidebar */}
                 <div className="w-1/4 flex flex-col gap-4 p-4 text-black overflow-y-auto h-full">
+
                     <div className="bg-gray-100 flex-2 rounded-lg shadow-md overflow-y-auto max-h-[calc(80vh-10rem)]">
                         <h1 className="text-lg font-bold text-gray-800 border-b  border-gray-300 pb-2 mb-3 p-4">
                             Data Lakehouse
@@ -262,13 +271,13 @@ export default function App() {
                         <TreeViewModule selectedTreeViewItem={selectedItem?.name || ""} onItemSelected={handleTreeItemSelected} />
                     </div>
 
+
                     {/* My Queries Section */}
                     <div className="bg-gray-100 flex-1 p-4 rounded-lg shadow-md">
                         <h1 className="text-lg font-bold text-gray-800 border-b border-gray-300 pb-2 mb-3 bg-gray-100">
                             Views
                         </h1>
                         <ListViewModule userCatalog={userCatalog} onQuerySelected={handleViewItemQuerySelected} onViewSelected={handleEditView} />
-
                     </div>
                 </div>
 
@@ -302,50 +311,53 @@ export default function App() {
                         </div>
 
                         {/* Splitter Bar */}
-                        <div
-                            className="cursor-row-resize bg-gray-300 h-2 hover:bg-gray-400 m-2 flex items-center justify-center"
-                            onMouseDown={handleMouseDown}
-                        >
-                            <span className="text-gray-500">••••</span>
+                        <div onMouseDown={handleMouseDown} className="cursor-row-resize bg-gray-400 h-2 hover:bg-gray-400 mx-auto my-2 flex items-center justify-center rounded-full" style={{ width: "60px" }} >
+                            <span className="text-gray-500"></span>
                         </div>
 
                         {/* TextArea at the Bottom */}
-                        <div
-                            className="mt-auto mr-2 ml-2 bg-white rounded-lg p-2 shadow-md"
-                            style={{ height: `calc(100% - ${height + 40}px)` }} // Adjust for splitter height and padding
+                        <div className="mt-auto mr-2 ml-2 bg-white rounded-lg p-2 shadow-md"
+                            style={{ height: `calc(100% - ${height + 70}px)` }} // Adjust for splitter height and padding
                         >  {isRunning && (<LinearProgress className="m-1" color="success" />)}
 
-                            <textarea style={{ height: `100%`, width: "100%", resize: "none" }}
-                                className="bg-white"
-                                id="outlined-multiline-flexible"
-                                placeholder="Enter your query..."
-                                // minRows={2}      // Start with 2 rows
-                                // maxRows={20}
-                                value={query}
-                                spellCheck={false}
-                                onChange={(e) => setQuery(e.target.value)
-                                    // Prevent manual resize
-                                }
-                            ></textarea>
+                            <div className="flex flex-row h-full w-full gap-2">
+                                {/* Left side: Textarea and buttons */}
+                                <div className={`flex-3 flex flex-col`}>
 
-                            <div className="absolute bottom-12 right-15 flex" style={{ gap: '3px' }}>
-                                <Button onClick={handleRunQuery} variant="contained" size="small" startIcon={<PlayCircleOutlineIcon />} disabled={!query.trim() || isRunning}>
-                                    {isRunning ? "Running..." : "Run"}
-                                </Button>
-                                <Button variant="contained" onClick={() => handleCreateView({ query })} disabled={!query.trim() || isRunning} color="success" size="small" startIcon={<PostAddIcon />} >
-                                    Create view
-                                </Button>
-                                <Button variant="contained" onClick={() => handleCreateView({ query })} disabled={!query.trim() || isRunning} color="warning" size="small" startIcon={<AutoAwesomeIcon />}>
-                                    AI
-                                </Button>
-                            </div>
+                                    <textarea style={{ height: `100%`, width: "100%", resize: "none", outline: "none" }} className="bg-white"
+                                        id="outlined-multiline-flexible"
+                                        placeholder="Enter your query..."
+                                        value={query}
+                                        spellCheck={false}
+                                        onChange={(e) => setQuery(e.target.value)}>
+                                    </textarea>
 
-                        </div>
+                                    <div className="flex justify-end mt-2" style={{ gap: '3px' }}>
+                                        <IconButton onClick={handleRunQuery} color="success" size="small" aria-label="run" disabled={!query.trim() || isRunning}>
+                                            <Tooltip title="Execute"><PlayCircleOutlineIcon /></Tooltip> 
+                                        </IconButton>
+                                        <IconButton onClick={() => handleCreateView({ query })} disabled={!query.trim() || isRunning} color="success" size="small" aria-label="create">
+                                            <Tooltip title="Create View"><PostAddIcon /></Tooltip> 
+                                        </IconButton>
+                                        <IconButton onClick={() => handleOpenDialogAI()} disabled={isRunning} color="warning" size="small" aria-label="AI">
+                                            <Tooltip title="Open AI assistant"><AutoAwesomeIcon /></Tooltip> 
+                                        </IconButton>
+                                    </div>
+                                </div>
+
+                                {/* Right side: Appears when AI is toggled */}
+                                {showRightColumn && (
+                                    <div className="flex-3 overflow-y-auto" style={{ maxHeight: '80vh' }} >
+                                        <ChatGptViewModule />
+                                    </div>
+                                )}
+
+                            </div> </div>
                         {/* Popup dialog to Edit/Save/Delete a View */}
                         <DialogView
-                            open={open}
+                            open={isDialogOpen}
                             editMode={isEditMode}
-                            handleClose={handleClose}
+                            handleClose={handleDialogClose}
                             handleSave={handleSaveView}  // ✅ Pass handleSave to the popup
                             selectedView={selectedView}
                         />

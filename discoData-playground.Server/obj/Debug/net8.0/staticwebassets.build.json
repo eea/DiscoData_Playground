@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "Hash": "I+AI4tM7Dg+4ynQjwzM5CQbsyA+p9Em++PRJSLsQsuk=",
+  "Hash": "HNLUhwNhF0ZM75n65oOJfPcxUNBCGwemd2BQGgTwYqA=",
   "Source": "discoData-playground.Server",
   "BasePath": "_content/discoData-playground.Server",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [
     {
-      "Identity": "c:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\discodata-playground.client\\discodata-playground.client.esproj",
+      "Identity": "C:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\discodata-playground.client\\discodata-playground.client.esproj",
       "Version": 2,
       "Source": "discodata-playground.client",
       "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",

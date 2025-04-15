@@ -76,3 +76,6 @@ c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server
 c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\obj\Debug\net8.0\discoData-playground.Server.genruntimeconfig.cache
 c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\obj\Debug\net8.0\ref\discoData-playground.Server.dll
 c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\obj\Debug\net8.0\discoData-playground.Server.sourcelink.json
+c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\bin\Debug\net8.0\OpenAI.dll
+c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\bin\Debug\net8.0\System.ClientModel.dll
+c:\Users\dubos\_projects\dotnet\discoData-playground\discoData-playground.Server\bin\Debug\net8.0\System.Memory.Data.dll

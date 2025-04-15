@@ -10,12 +10,23 @@ import {
   Divider,
 } from "@mui/material";
 
+interface View {
+  _id?: string;
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  query: string;
+}
+
 interface Props {
   open: boolean;
   editMode: boolean;
   handleClose: () => void;
   handleSave: (updatedView: any) => void;
+  
   selectedView: {
+    _id?: string;
     id: string;
     name: string;
     description: string;
@@ -56,8 +67,6 @@ const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: P
 
     setIsUpdating(true);
     // If not in edit mode, don't trigger a save
-
-
     try {
       setIsEditMode(false);
       handleSave(formValues); // Update the parent state
@@ -141,7 +150,19 @@ const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: P
           )}
         </DialogContent>
         <Divider />
-        <DialogActions>
+        <DialogActions
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    width: "100%",
+  }}
+>
+<div>
+    <Button onClick={handleClose} color="error">
+      Delete
+    </Button>
+  </div>
+  <div>
           <Button onClick={handleClose}>Cancel</Button>
 
           {isEditMode || !formValues?.id ? (
@@ -153,6 +174,7 @@ const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: P
               Edit
             </Button>
           )}
+           </div>
         </DialogActions>
       </form>
     </Dialog>

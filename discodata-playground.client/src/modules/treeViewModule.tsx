@@ -109,7 +109,8 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
 
       <div className="min-h-3 p-1">{loading && (<LinearProgress className="m-1" color="success" />)}</div>
 
-      <SimpleTreeView onExpandedItemsChange={handleExpandedItemsChange} expandedItems={expandedItems}>
+      <SimpleTreeView
+        onExpandedItemsChange={handleExpandedItemsChange} expandedItems={expandedItems}>
         {/* Render Schemas */}
         {dremioSchema ? (
           dremioSchema.map((schema, index) => {
