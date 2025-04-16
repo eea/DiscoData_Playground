@@ -7,7 +7,11 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 
-const ChatGptViewModule = () => {
+interface Props {
+  onPasteGPTCode: (item: { codeText: string;}) => void;
+}
+
+const ChatGptViewModule = ({onPasteGPTCode}: Props) => {
   const [chatGptMessages, setChatGptMessages] = useState<ChatGptMessage[]>([]);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -22,6 +26,10 @@ const ChatGptViewModule = () => {
     }).catch(err => {
       console.error('Could not copy text: ', err);
     });
+  }
+
+  const handleTransferCodeText = (codeText: any) => {
+    onPasteGPTCode({codeText: codeText});
   }
 
   useEffect(() => {
@@ -140,9 +148,11 @@ const ChatGptViewModule = () => {
                                 </Tooltip>
                               </IconButton>
                             </span>
-                            <span className="absolute top-2 right-10 px-2 py-1"><IconButton onClick={() => handleCopyCodeText(codeText)} color="info">
-                              <Tooltip title="Paste"><ReplyIcon /></Tooltip>
-                            </IconButton></span>
+                            <span className="absolute top-2 right-10 px-2 py-1">
+                              <IconButton onClick={() => handleTransferCodeText(codeText)} color="info">
+                                <Tooltip title="Paste"><ReplyIcon /></Tooltip>
+                              </IconButton>
+                            </span>
                           </div>
                         );
                       }

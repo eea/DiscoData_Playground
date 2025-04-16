@@ -38,6 +38,10 @@ export default function App() {
         setShowRightColumn(prev => !prev);
     };
 
+    const handlePastGPTCode = (item: {codeText: string}) =>{
+        setQuery(item.codeText);
+    }
+
     ////////////////////////////////////////////////
     // Functions to handle tree item selection
     ////////////////////////////////////////////////
@@ -348,7 +352,7 @@ export default function App() {
                                 {/* Right side: Appears when AI is toggled */}
                                 {showRightColumn && (
                                     <div className="flex-3 overflow-y-auto" style={{ maxHeight: '80vh' }} >
-                                        <ChatGptViewModule />
+                                        <ChatGptViewModule onPasteGPTCode={handlePastGPTCode} />
                                     </div>
                                 )}
 
