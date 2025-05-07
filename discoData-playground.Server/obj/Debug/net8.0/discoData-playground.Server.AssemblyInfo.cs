@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("discoData-playground.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+184c6c391b4118e6a3663b3277b83f644433012d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+714ba5cede45013bd6c50ef0523c6fafc2a2e355")]
 [assembly: System.Reflection.AssemblyProductAttribute("discoData-playground.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("discoData-playground.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

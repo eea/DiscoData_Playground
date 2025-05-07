@@ -11,7 +11,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { Button, LinearProgress, IconButton, Tooltip } from '@mui/material';
+import { LinearProgress, IconButton, Tooltip } from '@mui/material';
+import DialogChatGpt from './modules/dialogChatGpt'
 
 export default function App() {
     const [height, setHeight] = useState(700); // Initial height of the result area
@@ -24,11 +25,13 @@ export default function App() {
     const [isRunning, setIsRunning] = useState<boolean>(false); // Loading state for button
     const [queryResult, setQueryResult] = useState<any[]>([]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [isChatContextDialogOpen, setIsChatContextDialogOpen] = React.useState(true);
     const [isEditMode, setEditMode] = React.useState(false);
     const [selectedView, setSelectedView] = useState({ name: "", query: "", version: "", id: "", description: "" });
     const [showRightColumn, setShowRightColumn] = useState(false);
 
     const handleDialogClose = () => setIsDialogOpen(false);
+    const handleChatContextDialog = () => setIsChatContextDialogOpen(false); 
     const [selectedColumns, setSelectedColumns] = useState<string[]>([]); // State to keep track of selected columns
 
     ////////////////////////////////////////////////
@@ -365,6 +368,8 @@ export default function App() {
                             handleSave={handleSaveView}  // ✅ Pass handleSave to the popup
                             selectedView={selectedView}
                         />
+                        <DialogChatGpt 
+                            open={isChatContextDialogOpen} handleClose={handleChatContextDialog} />
                     </div>
                 </div>
             </div>

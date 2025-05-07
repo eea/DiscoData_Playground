@@ -32,8 +32,6 @@ const CustomTreeItemRoot = styled(TreeItem2Root)(({ theme }) => ({
 const CustomTreeItemContent = styled(TreeItem2Content)(({ theme }) => ({
   marginBottom: theme.spacing(0.1),
   color: theme.palette.text.secondary,
-
-
   fontWeight: theme.typography.fontWeightMedium,
   '&.expanded': {
     fontWeight: theme.typography.fontWeightRegular,

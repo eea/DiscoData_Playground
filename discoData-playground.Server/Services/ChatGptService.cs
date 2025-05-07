@@ -2,6 +2,12 @@ using OpenAI.Managers;
 using OpenAI;
 using OpenAI.ObjectModels.RequestModels;
 
+
+// key for EEA GPU1
+// sk-2VC-92JgQftvbDMUAuXsKQ
+// how to connect to GPU1 ????
+
+
 namespace discoData_playground.Server.Services
 {
     public class ChatGptService : IChatGptService
@@ -29,6 +35,8 @@ namespace discoData_playground.Server.Services
             if (!chatList.Any(m => m.Role == OpenAI.ObjectModels.StaticValues.ChatMessageRoles.System))
             {
                 chatList.Insert(0, ChatMessage.FromSystem(SystemPrompt));
+
+                //load here all column from the table the user work on
             }
 
             var response = _openAIService.ChatCompletion.CreateCompletionAsStream(new ChatCompletionCreateRequest

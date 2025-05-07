@@ -30,9 +30,9 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
   const [origin, setOrigin] = useState<string>("discodata"); // Set default value to the first MenuItem
   const [loading, setLoading] = React.useState(false);
 
-  useEffect(() => {
-    loadDremioSchema(origin); // Load schema when component mounts or origin changes
-  }, [origin]);
+  // useEffect(() => {
+  //   loadDremioSchema(origin); // Load schema when component mounts or origin changes
+  // }, [origin]);
 
   const loadDremioSchema = async (origin: string) => {
     try {

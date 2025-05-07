@@ -6,6 +6,8 @@ import ReactMarkdown from 'react-markdown'
 import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
+import ControlPointIcon from '@mui/icons-material/ControlPoint';
+
 
 interface Props {
   onPasteGPTCode: (item: { codeText: string;}) => void;
@@ -180,15 +182,28 @@ const ChatGptViewModule = ({onPasteGPTCode}: Props) => {
       {/* Fixed Input Area */}
       < div className="sticky bottom-0 bg-white pt-3 pb-2" >
         <div className="flex items-center gap-2">
-          <input
+          
+        <div className="relative w-full">
+          <textarea
             value={input}
+            rows={2}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleNewPrompt();
             }}
-            className="flex-grow border border-gray-300 rounded-lg p-2 focus:outline-none"
+             className="flex-grow w-full border border-gray-300 rounded-lg p-2 pr-8 focus:outline-none"
             placeholder="Ask something about Dremio..."
           />
+           <IconButton
+            className="!absolute !bottom-1 !left-1 !z-10"
+            onClick={handleNewPrompt}
+            style={{ color: "gray" }}
+            size="small">
+            <Tooltip title="Add ChatBot Context">
+              <ControlPointIcon />
+            </Tooltip>
+          </IconButton>
+          </div>
           <IconButton
             onClick={handleNewPrompt}
             color="success"
