@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useState, useRef } from "react";
 import {
   Box,
   InputLabel,
@@ -13,115 +14,118 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { fetchData } from "../services/discoDataApi";
+import { SchemaItem, TableItem, ColumnItem } from "../interfaces/dremioInterfaces";
 
 interface Props {
   open: boolean;
   handleClose: () => void;
+  dremioSchema: SchemaItem[] | null;
 }
 
-interface SchemaItem {
-  schemaName: string;
-  TABLE_SCHEMA: string;
-}
+const getSelectedValues = (event: React.ChangeEvent<HTMLSelectElement>): string[] => {
+  return Array.from(event.target.options)
+    .filter((option) => option.selected)
+    .map((option) => option.value);
+};
 
-interface TableItem {
-  TABLE_NAME: string;
-}
-
-const DialogChatGpt = ({ open, handleClose }: Props) => {
+const DialogChatGpt = ({ open, handleClose, dremioSchema }: Props) => {
   const [loading, setLoading] = useState(false);
-  const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
   const [dremioTable, setDremioTable] = useState<TableItem[]>([]);
   const [selectedSchemas, setSelectedSchemas] = useState<string[]>([]);
   const [selectedTables, setSelectedTables] = useState<string[]>([]);
-  const origin = "discodata";
 
-  useEffect(() => {
-    const loadDremioSchema = async () => {
-      try {
-        setLoading(true);
-        const result = await fetchData(`/getSchema/${origin}`);
-        setDremioSchema(result);
-      } catch (error) {
-        console.error("Error fetching schemas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadDremioSchema();
-  }, [origin]);
+  const contextInfoJsonRef = useRef<
+    {
+      schemaName: string;
+      tables: {
+        tableName: string;
+        columns: ColumnItem[];
+      }[];
+    }[]
+  >([]);
 
   const handleSchemaChangeWrapper = async (e: any) => {
     await handleSchemaSelected(e as React.ChangeEvent<HTMLSelectElement>);
   };
 
   const handleSchemaSelected = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { options } = event.target;
-    const selected: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
-      }
-    }
+    setLoading(true);
+    const selected = getSelectedValues(event);
     setSelectedSchemas(selected);
-    setSelectedTables([]); // reset tables
+    setSelectedTables([]);
+    contextInfoJsonRef.current = [];
+    const allTables: TableItem[] = [];
 
-    try {
-      setLoading(true);
-      const allTables: TableItem[] = [];
+    for (const schemaName of selected) {
+      const matchedSchema = dremioSchema?.find((s) => s.schemaName === schemaName);
+      if (!matchedSchema) continue;
 
-      for (const schemaName of selected) {
-        const matchedSchema = dremioSchema?.find((s) => s.schemaName === schemaName);
-        if (!matchedSchema) continue;
-
-        const result: TableItem[] = await fetchData(`/getTable/${matchedSchema.TABLE_SCHEMA}`);
-        allTables.push(...result);
+      try {
+        const result: TableItem[] = await fetchData(`/getTable/${matchedSchema.schema}`);
+        const enriched = result.map((item) => ({
+          ...item,
+          schemaName: matchedSchema.schema,
+        }));
+        allTables.push(...enriched);
+      } catch (error) {
+        console.error(`Failed to fetch tables for ${schemaName}:`, error);
       }
-
-      const uniqueTables = Array.from(new Set(allTables.map((t) => t.TABLE_NAME))).map((name) => ({
-        TABLE_NAME: name,
-      }));
-
-      setDremioTable(uniqueTables);
-    } catch (error) {
-      console.error("Error fetching tables for schemas:", error);
-    } finally {
-      setLoading(false);
     }
+
+    setDremioTable(allTables);
+    setLoading(false);
   };
 
   const handleTableChangeWrapper = (e: any) => {
     handleTableChange(e as React.ChangeEvent<HTMLSelectElement>);
   };
 
-  const handleTableChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { options } = event.target;
-    const selected: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
+  const handleTableChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = getSelectedValues(event);
+    setSelectedTables(selected);
+
+    const schemaTableMap: Record<string, { tableName: string; columns: ColumnItem[] }[]> = {};
+
+    for (const tableName of selected) {
+      const matchedTable = dremioTable.find((t) => t.tableName === tableName);
+      if (!matchedTable) continue;
+
+      try {
+        const columns: ColumnItem[] = await fetchData(`/getColumn/${matchedTable.schemaName}/${tableName}`);
+
+        if (!schemaTableMap[matchedTable.schemaName]) {
+          schemaTableMap[matchedTable.schemaName] = [];
+        }
+
+        schemaTableMap[matchedTable.schemaName].push({
+          tableName,
+          columns,
+        });
+      } catch (error) {
+        console.error(`Failed to fetch columns for ${tableName}:`, error);
       }
     }
-    setSelectedTables(selected);
+
+    contextInfoJsonRef.current = Object.entries(schemaTableMap).map(([schemaName, tables]) => ({
+      schemaName,
+      tables,
+    }));
+
+    console.log(contextInfoJsonRef);
   };
 
-
-  const handleSendAIContext = async (event: React.FormEvent) => {
+  const handleSendAIContext = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("Selected Tables:", selectedTables);
+    //send the sjon to app and then the app send it to chatGptDialog
     handleClose();
   };
 
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={handleClose}>
       <form onSubmit={handleSendAIContext}>
-        <DialogTitle>
+        <DialogTitle className="flex items-center justify-between">
           Add AI Chatbot Context
-          {loading && (
-            <div className="min-h-3 p-1">
-              <LinearProgress className="m-1" color="success" />
-            </div>
-          )}
+          {loading && <LinearProgress className="ml-4 w-32" color="success" />}
         </DialogTitle>
         <Divider />
         <DialogContent>
@@ -132,25 +136,20 @@ const DialogChatGpt = ({ open, handleClose }: Props) => {
               <Select
                 multiple
                 native
-                label="Schema"
                 value={selectedSchemas}
                 onChange={handleSchemaChangeWrapper}
                 inputProps={{
                   id: "select-schema-native",
-                  style: { height: 150 } // this controls the height of the select box
+                  style: { height: 150 },
                 }}
               >
                 {dremioSchema?.map((schema, index) => (
-                  <option
-                    key={`${schema.TABLE_SCHEMA}-${index}`}
-                    value={schema.schemaName}
-                  >
+                  <option key={`${schema.schema}-${index}`} value={schema.schemaName}>
                     {schema.schemaName}
                   </option>
                 ))}
               </Select>
             </FormControl>
-
 
             {/* Table Selector */}
             <FormControl fullWidth disabled={selectedSchemas.length === 0} sx={{ minHeight: 200 }}>
@@ -158,37 +157,29 @@ const DialogChatGpt = ({ open, handleClose }: Props) => {
               <Select
                 multiple
                 native
-                label="Tables"
                 value={selectedTables}
                 onChange={handleTableChangeWrapper}
                 inputProps={{
                   id: "select-table-native",
-                  style: { height: 150 }
+                  style: { height: 150 },
                 }}
               >
                 {dremioTable.map((table) => (
-                  <option
-                    key={table.TABLE_NAME}
-                    value={table.TABLE_NAME}
-                  >
-                    {table.TABLE_NAME}
+                  <option key={table.tableName} value={table.tableName}>
+                    {table.tableName}
                   </option>
                 ))}
               </Select>
             </FormControl>
-
           </Box>
         </DialogContent>
 
-
         <Divider />
+
         <DialogActions sx={{ justifyContent: "space-between" }}>
-          <Button onClick={handleClose} color="error">
-            Delete
-          </Button>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" color="primary" variant="contained">
-            Submit
+            Add context
           </Button>
         </DialogActions>
       </form>

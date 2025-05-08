@@ -13,6 +13,7 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { LinearProgress, IconButton, Tooltip } from '@mui/material';
 import DialogChatGpt from './modules/dialogChatGpt'
+import { SchemaItem } from './interfaces/dremioInterfaces';
 
 export default function App() {
     const [height, setHeight] = useState(700); // Initial height of the result area
@@ -29,6 +30,7 @@ export default function App() {
     const [isEditMode, setEditMode] = React.useState(false);
     const [selectedView, setSelectedView] = useState({ name: "", query: "", version: "", id: "", description: "" });
     const [showRightColumn, setShowRightColumn] = useState(false);
+     const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
 
     const handleDialogClose = () => setIsDialogOpen(false);
     const handleChatContextDialog = () => setIsChatContextDialogOpen(false); 
@@ -37,6 +39,10 @@ export default function App() {
     ////////////////////////////////////////////////
     // Functions to handlecall to chatGPT assistant
     ////////////////////////////////////////////////
+    const handleDremioSchemaLoaded = (schema:SchemaItem[]) => {
+        setDremioSchema(schema);
+    };
+
     const handleOpenDialogAI = () => {
         setShowRightColumn(prev => !prev);
     };
@@ -275,7 +281,7 @@ export default function App() {
                         <h1 className="text-lg font-bold text-gray-800 border-b  border-gray-300 pb-2 mb-3 p-4">
                             Data Lakehouse
                         </h1>
-                        <TreeViewModule selectedTreeViewItem={selectedItem?.name || ""} onItemSelected={handleTreeItemSelected} />
+                        <TreeViewModule selectedTreeViewItem={selectedItem?.name || ""} onItemSelected={handleTreeItemSelected} onSchemaLoaded={handleDremioSchemaLoaded} />
                     </div>
 
 
@@ -369,7 +375,7 @@ export default function App() {
                             selectedView={selectedView}
                         />
                         <DialogChatGpt 
-                            open={isChatContextDialogOpen} handleClose={handleChatContextDialog} />
+                            open={isChatContextDialogOpen} handleClose={handleChatContextDialog} dremioSchema={dremioSchema}/>
                     </div>
                 </div>
             </div>

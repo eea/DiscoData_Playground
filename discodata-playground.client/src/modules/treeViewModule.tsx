@@ -16,33 +16,36 @@ import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import AbcIcon from "@mui/icons-material/Abc";
 import Grid3x3Icon from "@mui/icons-material/Grid3x3";
 import ListIcon from "@mui/icons-material/List";
+import { SchemaItem } from './../interfaces/dremioInterfaces';
 
 interface Props {
   selectedTreeViewItem: string;
   onItemSelected: (item: { type: string; name: string; table?: string; schema?: string }) => void;
+  onSchemaLoaded: (schema: SchemaItem[]) => void;
 }
 
-const MyTreeViewModule = ({ onItemSelected }: Props) => {
-  const [dremioSchema, setDremioSchema] = useState<Record<string, any>[] | null>(null);
+const MyTreeViewModule = ({ onItemSelected, onSchemaLoaded }: Props) => {
+  // const [dremioSchema, setDremioSchema] = useState<Record<string, any>[] | null>(null);
+  const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
   const [selectedSchema, setSelectedSchema] = useState<Record<string, any[]>>({});
   const [selectedTable, setSelectedTable] = useState<Record<string, any[]>>({});
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [origin, setOrigin] = useState<string>("discodata"); // Set default value to the first MenuItem
   const [loading, setLoading] = React.useState(false);
 
-  // useEffect(() => {
-  //   loadDremioSchema(origin); // Load schema when component mounts or origin changes
-  // }, [origin]);
+  useEffect(() => {
+    loadDremioSchema(origin); // Load schema when component mounts or origin changes
+  }, [origin]);
 
   const loadDremioSchema = async (origin: string) => {
     try {
       setLoading(true);
       const result = await fetchData(`/getSchema/${origin}`); // Pass origin to the endpoint
-      console.log("Schema data:", result);
       setDremioSchema(result);
+      onSchemaLoaded(result);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching data from API method getSchema:", error);
     }
   };
 
@@ -114,7 +117,7 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
         {/* Render Schemas */}
         {dremioSchema ? (
           dremioSchema.map((schema, index) => {
-            const schemaKey = schema.TABLE_SCHEMA;
+            const schemaKey = schema.schema;
             return (
               <CustomTreeItem
                 key={index}
@@ -125,16 +128,16 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
               >
                 {/* Render Tables */}
                 {selectedSchema[schemaKey]?.map((table, tableIndex) => {
-                  const tableKey = `${schemaKey}-${table.TABLE_NAME}`;
+                  const tableKey = `${schemaKey}-${table.tableName}`;
                   return (
                     <CustomTreeItem
                       key={tableIndex}
-                      itemId={`table-${schemaKey}-${table.TABLE_NAME}-${tableIndex}`}
-                      label={table.TABLE_NAME}
+                      itemId={`table-${schemaKey}-${table.tableName}-${tableIndex}`}
+                      label={table.tableName}
                       labelIcon={AutoAwesomeMotionIcon}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleTableClick(schemaKey, table.TABLE_NAME, tableIndex);
+                        handleTableClick(schemaKey, table.tableName, tableIndex);
                       }}
                     >
                       {/* Render Columns */}
@@ -156,12 +159,12 @@ const MyTreeViewModule = ({ onItemSelected }: Props) => {
                         return (
                           <CustomTreeItem
                             key={colIndex}
-                            itemId={`column-${schemaKey}-${table.TABLE_NAME}-${column.COLUMN_NAME}`}
+                            itemId={`column-${schemaKey}-${table.tableName}-${column.COLUMN_NAME}`}
                             label={column.COLUMN_NAME} // Display column name
                             labelIcon={ColumnIcon} // Set dynamically
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleColumnClick(schemaKey, table.TABLE_NAME, column.COLUMN_NAME);
+                              handleColumnClick(schemaKey, table.tableName, column.COLUMN_NAME);
                             }}
                           />
                         );

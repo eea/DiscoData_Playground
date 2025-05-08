@@ -8,7 +8,6 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
 
-
 interface Props {
   onPasteGPTCode: (item: { codeText: string;}) => void;
 }
