@@ -7,16 +7,39 @@ import ReplyIcon from '@mui/icons-material/Reply';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
+import { ChatBoxContext } from "../interfaces/dremioInterfaces";
 
 interface Props {
   onPasteGPTCode: (item: { codeText: string;}) => void;
+  onOpenChatContext : () => void;
+  chatContext : ChatBoxContext[] |null;
 }
 
-const ChatGptViewModule = ({onPasteGPTCode}: Props) => {
+const ChatGptViewModule = ({onPasteGPTCode, onOpenChatContext, chatContext}: Props) => {
   const [chatGptMessages, setChatGptMessages] = useState<ChatGptMessage[]>([]);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const [copiedCodeText, setCopiedCodeText] = useState<string | null>(null);
+
+  //Load chatcontext coming from parent
+  useEffect(() => {
+    console.log("chatContext updated:", chatContext);
+
+    // call here backend to setup the context
+    const uploadContext = async () => {
+       fetch('/chatgpt/uploadContext', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chatContext }),
+      });
+    };
+
+    if (chatContext) {
+      uploadContext();
+    }
+  }, [chatContext]);
 
   const handleCopyCodeText = (codeText: any) => {
     setCopiedCodeText(codeText);
@@ -195,7 +218,7 @@ const ChatGptViewModule = ({onPasteGPTCode}: Props) => {
           />
            <IconButton
             className="!absolute !bottom-1 !left-1 !z-10"
-            onClick={handleNewPrompt}
+            onClick={onOpenChatContext}
             style={{ color: "gray" }}
             size="small">
             <Tooltip title="Add ChatBot Context">

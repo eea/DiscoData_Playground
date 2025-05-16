@@ -20,7 +20,7 @@ namespace discoData_playground.Server.Controllers
         }
 
         [HttpPost("StreamChat")]
-        public async Task StreamChat2([FromBody] ChatGptMessage request)
+        public async Task StreamChat([FromBody] ChatGptMessage request)
         {
             Response.ContentType = "text/event-stream"; // SSE for streaming
 
@@ -30,6 +30,24 @@ namespace discoData_playground.Server.Controllers
                 await Response.WriteAsync($"data:{json}\n");
                 await Response.Body.FlushAsync();
             }
+        }
+
+        // [HttpPost("UploadContext")]
+        // public IActionResult UploadContext([FromBody] Object context)
+        // {
+        //     Response.ContentType = "text/event-stream"; // SSE for streaming
+
+        //    // _chatGptService.UploadContext(context);
+        //     return Ok();
+        // }
+
+        [HttpPost("UploadContext")]
+        public IActionResult UploadContext([FromBody] ChatGptContext context)
+        {
+            Response.ContentType = "text/event-stream"; // SSE for streaming
+
+            _chatGptService.UploadContext(context);
+            return Ok();
         }
     }
 }

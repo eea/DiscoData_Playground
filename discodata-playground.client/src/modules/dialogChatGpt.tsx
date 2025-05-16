@@ -14,11 +14,12 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { fetchData } from "../services/discoDataApi";
-import { SchemaItem, TableItem, ColumnItem } from "../interfaces/dremioInterfaces";
+import { SchemaItem, TableItem, ColumnItem, ChatBoxContext } from "../interfaces/dremioInterfaces";
 
 interface Props {
   open: boolean;
   handleClose: () => void;
+  handleAddContext: (context: ChatBoxContext[]) => void;
   dremioSchema: SchemaItem[] | null;
 }
 
@@ -28,7 +29,7 @@ const getSelectedValues = (event: React.ChangeEvent<HTMLSelectElement>): string[
     .map((option) => option.value);
 };
 
-const DialogChatGpt = ({ open, handleClose, dremioSchema }: Props) => {
+const DialogChatGpt = ({ open, handleClose, dremioSchema, handleAddContext }: Props) => {
   const [loading, setLoading] = useState(false);
   const [dremioTable, setDremioTable] = useState<TableItem[]>([]);
   const [selectedSchemas, setSelectedSchemas] = useState<string[]>([]);
@@ -117,6 +118,7 @@ const DialogChatGpt = ({ open, handleClose, dremioSchema }: Props) => {
   const handleSendAIContext = (event: React.FormEvent) => {
     event.preventDefault();
     //send the sjon to app and then the app send it to chatGptDialog
+    handleAddContext(contextInfoJsonRef.current);
     handleClose();
   };
 

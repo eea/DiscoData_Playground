@@ -17,4 +17,12 @@ export interface SchemaItem {
       IS_NULLABLE: string;
       DATA_TYPE: string;
     }
+
+    export type ChatBoxContext = {
+  schemaName: string;
+  tables: {
+    tableName: string;
+    columns: ColumnItem[];
+  }[];
+};
     

@@ -1,5 +1,5 @@
 "use client"; // Ensure it runs on client-side
-import React from "react";
+import React, { useRef } from "react";
 import { useEffect, useState } from "react";
 import { postData } from "./services/discoDataApi";
 import { fetchData } from "./services/discoDataApi";
@@ -13,43 +13,43 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { LinearProgress, IconButton, Tooltip } from '@mui/material';
 import DialogChatGpt from './modules/dialogChatGpt'
-import { SchemaItem } from './interfaces/dremioInterfaces';
+import { SchemaItem, ChatBoxContext } from './interfaces/dremioInterfaces';
 
 export default function App() {
-    const [height, setHeight] = useState(700); // Initial height of the result area
+    const [height, setHeight] = useState(500); // Initial height of the result area
     const [isDragging, setIsDragging] = useState(false);
     const [selectedItem, setSelectedItem] = useState<{ type: string; name: string; schema?: string } | null>(null);
     const [userCatalog, setUserCatalog] = useState<any>(null);
     const [query, setQuery] = useState<string>(``);
     const [debouncedQuery, setDebouncedQuery] = useState<string>("");
     const [suggestedTable, setSuggestedTable] = useState<string | null>(null);
+    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
     const [isRunning, setIsRunning] = useState<boolean>(false); // Loading state for button
     const [queryResult, setQueryResult] = useState<any[]>([]);
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-    const [isChatContextDialogOpen, setIsChatContextDialogOpen] = React.useState(true);
+    const [isChatContextDialogOpen, setChatContextDialogOpen] = React.useState(false);
     const [isEditMode, setEditMode] = React.useState(false);
     const [selectedView, setSelectedView] = useState({ name: "", query: "", version: "", id: "", description: "" });
     const [showRightColumn, setShowRightColumn] = useState(false);
-     const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
+    const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
+    const [chatBoxContext, setChatBoxContext] = useState<ChatBoxContext[] | null >(null);
+    
+   const handleAddContext = (context: ChatBoxContext[]) => {
+    console.log('Received context from dialog:', context);
+    setChatBoxContext(context);
+  };
 
-    const handleDialogClose = () => setIsDialogOpen(false);
-    const handleChatContextDialog = () => setIsChatContextDialogOpen(false); 
-    const [selectedColumns, setSelectedColumns] = useState<string[]>([]); // State to keep track of selected columns
+    const handleChatContextDialogOpen = () => setChatContextDialogOpen(true); 
+    const handleChatContextDialogClose = () => setChatContextDialogOpen(false); 
 
     ////////////////////////////////////////////////
     // Functions to handlecall to chatGPT assistant
     ////////////////////////////////////////////////
-    const handleDremioSchemaLoaded = (schema:SchemaItem[]) => {
-        setDremioSchema(schema);
-    };
+    const handleDremioSchemaLoaded = (schema:SchemaItem[]) => {setDremioSchema(schema);};
 
-    const handleOpenDialogAI = () => {
-        setShowRightColumn(prev => !prev);
-    };
+    const handleOpenDialogAI = () => {setShowRightColumn(prev => !prev);};
 
-    const handlePastGPTCode = (item: {codeText: string}) =>{
-        setQuery(item.codeText);
-    }
+    const handlePastGPTCode = (item: {codeText: string}) =>{setQuery(item.codeText);}
 
     ////////////////////////////////////////////////
     // Functions to handle tree item selection
@@ -78,9 +78,6 @@ export default function App() {
         if (!query.trim()) {
             return;
         }
-
-        // const escapedQuery = escapeQuery(cleanedQuery);
-        //const payload = JSON.stringify({ query: query });
 
         const payload = { query: query };
         setIsRunning(true); // Show loading state on button
@@ -126,6 +123,8 @@ export default function App() {
         loadUserCatalog(); // Call the function directly
     }, []);
 
+    const handleDialogClose = () => setIsDialogOpen(false);
+    
     const handleViewItemQuerySelected = (view: { query: string }) => {
         setQuery(view.query);
     }
@@ -361,21 +360,15 @@ export default function App() {
                                 {/* Right side: Appears when AI is toggled */}
                                 {showRightColumn && (
                                     <div className="flex-3 overflow-y-auto" style={{ maxHeight: '80vh' }} >
-                                        <ChatGptViewModule onPasteGPTCode={handlePastGPTCode} />
+                                        <ChatGptViewModule onPasteGPTCode={handlePastGPTCode} onOpenChatContext={handleChatContextDialogOpen} chatContext={chatBoxContext} />
                                     </div>
                                 )}
 
                             </div> </div>
                         {/* Popup dialog to Edit/Save/Delete a View */}
-                        <DialogView
-                            open={isDialogOpen}
-                            editMode={isEditMode}
-                            handleClose={handleDialogClose}
-                            handleSave={handleSaveView}  // ✅ Pass handleSave to the popup
-                            selectedView={selectedView}
-                        />
-                        <DialogChatGpt 
-                            open={isChatContextDialogOpen} handleClose={handleChatContextDialog} dremioSchema={dremioSchema}/>
+                        <DialogView open={isDialogOpen} editMode={isEditMode} handleClose={handleDialogClose} handleSave={handleSaveView} selectedView={selectedView}/>
+                        
+                        <DialogChatGpt open={isChatContextDialogOpen} handleClose={handleChatContextDialogClose} dremioSchema={dremioSchema} handleAddContext={handleAddContext} />
                     </div>
                 </div>
             </div>

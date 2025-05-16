@@ -41,10 +41,6 @@ if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
 const dotnetOrigine = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
     env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7018';
 
-
-
-
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     const envVars = loadEnv(mode, process.cwd(), '');
@@ -107,6 +103,12 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     secure: false, // If using self-signed certs
                     rewrite: (path) => path.replace(/^\/chatgpt\/streamchat/, '/chatgpt/StreamChat'),
+                },
+                  '/chatgpt/uploadContext': {
+                    target: dotnetOrigine,
+                    changeOrigin: true,
+                    secure: false, // If using self-signed certs
+                    rewrite: (path) => path.replace(/^\/chatgpt\/uploadContext/, '/chatgpt/UploadContext'),
                 }
             },
             port: 56149,

@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\dubos\\source\\repos\\discoData-playground\\",
+  "WorkspaceRootPath": "C:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EDD47007-A3B0-4F79-9294-FF06D1547EAB}|discodata-playground.client\\discodata-playground.client.esproj|c:\\users\\dubos\\source\\repos\\discodata-playground\\discodata-playground.client\\src\\app.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "AbsoluteMoniker": "D:0:0:{EDD47007-A3B0-4F79-9294-FF06D1547EAB}|discodata-playground.client\\discodata-playground.client.esproj|c:\\users\\dubos\\_projects\\dotnet\\discodata-playground\\discodata-playground.client\\src\\app.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
       "RelativeMoniker": "D:0:0:{EDD47007-A3B0-4F79-9294-FF06D1547EAB}|discodata-playground.client\\discodata-playground.client.esproj|solutionrelative:discodata-playground.client\\src\\app.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "App.tsx",
-              "DocumentMoniker": "C:\\Users\\dubos\\source\\repos\\discoData-playground\\discodata-playground.client\\src\\App.tsx",
+              "DocumentMoniker": "C:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\discodata-playground.client\\src\\App.tsx",
               "RelativeDocumentMoniker": "discodata-playground.client\\src\\App.tsx",
-              "ToolTip": "C:\\Users\\dubos\\source\\repos\\discoData-playground\\discodata-playground.client\\src\\App.tsx",
+              "ToolTip": "C:\\Users\\dubos\\_projects\\dotnet\\discoData-playground\\discodata-playground.client\\src\\App.tsx",
               "RelativeToolTip": "discodata-playground.client\\src\\App.tsx",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAFMBAAAAAAAAAAAjwHUBAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
               "WhenOpened": "2025-03-19T14:06:16.672Z",
               "EditorCaption": ""
