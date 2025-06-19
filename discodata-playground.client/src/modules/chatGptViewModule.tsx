@@ -8,6 +8,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
 import { ChatBoxContext } from "../interfaces/dremioInterfaces";
+import PostAddIcon from '@mui/icons-material/PostAdd';
 
 interface Props {
   onPasteGPTCode: (item: { codeText: string;}) => void;
@@ -222,7 +223,7 @@ const ChatGptViewModule = ({onPasteGPTCode, onOpenChatContext, chatContext}: Pro
             style={{ color: "gray" }}
             size="small">
             <Tooltip title="Add ChatBot Context">
-              <ControlPointIcon />
+             <PostAddIcon color={chatContext && chatContext.length > 0 ? "primary" : "inherit"} />
             </Tooltip>
           </IconButton>
           </div>

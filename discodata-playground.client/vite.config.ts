@@ -98,13 +98,18 @@ export default defineConfig(({ mode }) => {
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/updateView/, '/api/View/UpdateView'),
                 },
+                '/deleteView': {
+                    target: VITE_API_BASE_URL,
+                    changeOrigin: true,
+                    rewrite: (path) => path.replace(/^\/deleteView\/(.+)/, '/api/View/DeleteView/$1'),
+                },
                 '/chatgpt/streamchat': {
                     target: dotnetOrigine,
                     changeOrigin: true,
                     secure: false, // If using self-signed certs
                     rewrite: (path) => path.replace(/^\/chatgpt\/streamchat/, '/chatgpt/StreamChat'),
                 },
-                  '/chatgpt/uploadContext': {
+                '/chatgpt/uploadContext': {
                     target: dotnetOrigine,
                     changeOrigin: true,
                     secure: false, // If using self-signed certs

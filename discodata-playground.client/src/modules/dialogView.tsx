@@ -24,7 +24,7 @@ interface Props {
   editMode: boolean;
   handleClose: () => void;
   handleSave: (updatedView: any) => void;
-  
+  handleDelete: (deletedView: View) => void;
   selectedView: {
     _id?: string;
     id: string;
@@ -35,20 +35,29 @@ interface Props {
   };
 }
 
-const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: Props) => {
+const DialogView = ({ open, editMode, handleClose, handleSave, handleDelete, selectedView }: Props) => {
   const [isEditMode, setIsEditMode] = useState(editMode);
   const [isUpdating, setIsUpdating] = useState(false);
   const [formValues, setFormValues] = useState(selectedView);
 
-  // Ensure formValues updates when selectedView changes
   useEffect(() => {
     if (editMode) {
       setIsEditMode(editMode);
-    };
-    if (selectedView) {
-      setFormValues(selectedView);
     }
-  }, [selectedView]);
+
+    if (selectedView) {
+      const cleanedQuery = selectedView.query
+        ?.replace(/[\r\n]+/g, ' ')  // Remove line breaks
+        .replace(/\s+/g, ' ')       // Collapse multiple spaces
+        .trim();                    // Trim ends
+
+      setFormValues({
+        ...selectedView,
+        query: cleanedQuery ?? '', // Use sanitized query or empty string
+      });
+    }
+  }, [selectedView, editMode]);
+
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +68,22 @@ const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: P
     event.preventDefault(); // ✅ Prevent form submission
     setIsEditMode(true);
   };
+
+  const handleDeleteView = async () => {
+    if (!isEditMode) return;
+
+    setIsUpdating(true);
+    try {
+      setIsEditMode(false);
+      handleDelete(selectedView);
+      handleClose();
+    } catch (error) {
+      console.error("Error deleting View:", error);
+      alert("Failed to delete the view. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  }
 
   // Handle form submission (update & close)
   const handleSaveView = async (event: React.FormEvent) => {
@@ -151,30 +176,30 @@ const DialogView = ({ open, editMode, handleClose, handleSave, selectedView }: P
         </DialogContent>
         <Divider />
         <DialogActions
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    width: "100%",
-  }}
->
-<div>
-    <Button onClick={handleClose} color="error">
-      Delete
-    </Button>
-  </div>
-  <div>
-          <Button onClick={handleClose}>Cancel</Button>
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <div>
+            <Button onClick={handleDeleteView} color="error">
+              Delete
+            </Button>
+          </div>
+          <div>
+            <Button onClick={handleClose}>Cancel</Button>
 
-          {isEditMode || !formValues?.id ? (
-            <Button type="submit" color="primary">
-              {formValues?.id ? "Update" : "Save"}
-            </Button>
-          ) : (
-            <Button type="button" onClick={handleEditMode} color="primary">
-              Edit
-            </Button>
-          )}
-           </div>
+            {isEditMode || !formValues?.id ? (
+              <Button type="submit" color="primary">
+                {formValues?.id ? "Update" : "Save"}
+              </Button>
+            ) : (
+              <Button type="button" onClick={handleEditMode} color="primary">
+                Edit
+              </Button>
+            )}
+          </div>
         </DialogActions>
       </form>
     </Dialog>

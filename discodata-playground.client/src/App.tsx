@@ -1,8 +1,7 @@
 "use client"; // Ensure it runs on client-side
 import React, { useRef } from "react";
 import { useEffect, useState } from "react";
-import { postData } from "./services/discoDataApi";
-import { fetchData } from "./services/discoDataApi";
+import { postData, fetchData } from "./services/discoDataApi";
 import TreeViewModule from "./modules/treeViewModule";
 import ListViewModule from "./modules/listViewModule";
 import DialogView from "./modules/dialogView";
@@ -32,24 +31,24 @@ export default function App() {
     const [selectedView, setSelectedView] = useState({ name: "", query: "", version: "", id: "", description: "" });
     const [showRightColumn, setShowRightColumn] = useState(false);
     const [dremioSchema, setDremioSchema] = useState<SchemaItem[] | null>(null);
-    const [chatBoxContext, setChatBoxContext] = useState<ChatBoxContext[] | null >(null);
-    
-   const handleAddContext = (context: ChatBoxContext[]) => {
-    console.log('Received context from dialog:', context);
-    setChatBoxContext(context);
-  };
+    const [chatBoxContext, setChatBoxContext] = useState<ChatBoxContext[] | null>(null);
 
-    const handleChatContextDialogOpen = () => setChatContextDialogOpen(true); 
-    const handleChatContextDialogClose = () => setChatContextDialogOpen(false); 
+    const handleAddContext = (context: ChatBoxContext[]) => {
+        console.log('Received context from dialog:', context);
+        setChatBoxContext(context);
+    };
+
+    const handleChatContextDialogOpen = () => setChatContextDialogOpen(true);
+    const handleChatContextDialogClose = () => setChatContextDialogOpen(false);
 
     ////////////////////////////////////////////////
     // Functions to handlecall to chatGPT assistant
     ////////////////////////////////////////////////
-    const handleDremioSchemaLoaded = (schema:SchemaItem[]) => {setDremioSchema(schema);};
+    const handleDremioSchemaLoaded = (schema: SchemaItem[]) => { setDremioSchema(schema); };
 
-    const handleOpenDialogAI = () => {setShowRightColumn(prev => !prev);};
+    const handleOpenDialogAI = () => { setShowRightColumn(prev => !prev); };
 
-    const handlePastGPTCode = (item: {codeText: string}) =>{setQuery(item.codeText);}
+    const handlePastGPTCode = (item: { codeText: string }) => { setQuery(item.codeText); }
 
     ////////////////////////////////////////////////
     // Functions to handle tree item selection
@@ -124,7 +123,7 @@ export default function App() {
     }, []);
 
     const handleDialogClose = () => setIsDialogOpen(false);
-    
+
     const handleViewItemQuerySelected = (view: { query: string }) => {
         setQuery(view.query);
     }
@@ -134,6 +133,28 @@ export default function App() {
         setIsDialogOpen(true);
         setEditMode(true);
     };
+
+    const handleDeleteView = async (myView: any) => {
+        // Find the original view before deleting
+        const originalView = userCatalog.find((view: any) => view.id === myView.id);
+        if (!originalView) {
+            return;
+        }
+
+        try {
+             await fetchData(`/deleteView/${myView.id}`); // ✅ Delete on backend
+
+            // 🗑️ Remove the view from local state
+            setUserCatalog((prevCatalog: any) =>
+                prevCatalog.filter((view: any) => view.id !== myView.id)
+            );
+        } catch (error) {
+            console.error("Error deleting view:", error);
+        } finally {
+            setIsDialogOpen(false); // Close the popup
+        }
+    };
+
 
     const handleCreateView = (view: any) => {
         setEditMode(true);
@@ -346,13 +367,13 @@ export default function App() {
 
                                     <div className="flex justify-end mt-2" style={{ gap: '3px' }}>
                                         <IconButton onClick={handleRunQuery} color="success" size="small" aria-label="run" disabled={!query.trim() || isRunning}>
-                                            <Tooltip title="Execute"><PlayCircleOutlineIcon /></Tooltip> 
+                                            <Tooltip title="Execute"><PlayCircleOutlineIcon /></Tooltip>
                                         </IconButton>
                                         <IconButton onClick={() => handleCreateView({ query })} disabled={!query.trim() || isRunning} color="success" size="small" aria-label="create">
-                                            <Tooltip title="Create View"><PostAddIcon /></Tooltip> 
+                                            <Tooltip title="Create View"><PostAddIcon /></Tooltip>
                                         </IconButton>
                                         <IconButton onClick={() => handleOpenDialogAI()} disabled={isRunning} color="warning" size="small" aria-label="AI">
-                                            <Tooltip title="Open AI assistant"><AutoAwesomeIcon /></Tooltip> 
+                                            <Tooltip title="Open AI assistant"><AutoAwesomeIcon /></Tooltip>
                                         </IconButton>
                                     </div>
                                 </div>
@@ -366,8 +387,8 @@ export default function App() {
 
                             </div> </div>
                         {/* Popup dialog to Edit/Save/Delete a View */}
-                        <DialogView open={isDialogOpen} editMode={isEditMode} handleClose={handleDialogClose} handleSave={handleSaveView} selectedView={selectedView}/>
-                        
+                        <DialogView open={isDialogOpen} editMode={isEditMode} handleClose={handleDialogClose} handleSave={handleSaveView} handleDelete={handleDeleteView} selectedView={selectedView} />
+
                         <DialogChatGpt open={isChatContextDialogOpen} handleClose={handleChatContextDialogClose} dremioSchema={dremioSchema} handleAddContext={handleAddContext} />
                     </div>
                 </div>

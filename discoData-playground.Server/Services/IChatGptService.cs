@@ -8,8 +8,11 @@ namespace discoData_playground.Server.Services
 {
     public interface IChatGptService
     {
-        IAsyncEnumerable<string> StreamChatAsync(List<ChatMessage> history);
+        IAsyncEnumerable<string> StreamChatCloud(List<ChatMessage> history);
+         IAsyncEnumerable<string> StreamChatLocal(List<ChatMessage> history);
+
 
         void UploadContext(ChatGptContext context);
+
     }
 }

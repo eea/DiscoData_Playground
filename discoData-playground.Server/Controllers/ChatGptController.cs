@@ -2,7 +2,7 @@ using System.Text.Json;
 using discoData_playground.Server.Class;
 using discoData_playground.Server.Services;
 using Microsoft.AspNetCore.Mvc;
-using OpenAI.ObjectModels.RequestModels;
+// using OpenAI.ObjectModels.RequestModels;
 
 namespace discoData_playground.Server.Controllers
 {
@@ -24,7 +24,7 @@ namespace discoData_playground.Server.Controllers
         {
             Response.ContentType = "text/event-stream"; // SSE for streaming
 
-            await foreach (var chunk in _chatGptService.StreamChatAsync(request.History))
+            await foreach (var chunk in _chatGptService.StreamChatCloud(request.History))
             {
                 var json = JsonSerializer.Serialize(new { content = chunk });
                 await Response.WriteAsync($"data:{json}\n");
