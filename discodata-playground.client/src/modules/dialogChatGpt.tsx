@@ -1,4 +1,6 @@
 
+// This is the popup window that is used to select the context for the AI 
+
 import { useState, useRef } from "react";
 import {
   Box,
