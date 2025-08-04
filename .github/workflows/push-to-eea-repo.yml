@@ -28,4 +28,4 @@ jobs:
           git config --global user.email "github-actions@github.com"
           
           git remote add eea git@github.com:eea/DiscoData_Playground.git
-          git push --force eea main
+          git push --force eea Development
