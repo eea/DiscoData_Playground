@@ -3,7 +3,7 @@ name: Push to EEA Repo via SSH
 on:
   push:
     branches:
-      - main
+      - Development
 
 jobs:
   deploy:
