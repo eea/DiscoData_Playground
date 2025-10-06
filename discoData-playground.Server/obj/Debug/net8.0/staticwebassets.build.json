@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "iK4UFjO9MglYEgf2p+TInPkQ72BMiTq1Yc4zJqzPwF0=",
+  "Hash": "HNLUhwNhF0ZM75n65oOJfPcxUNBCGwemd2BQGgTwYqA=",
   "Source": "discoData-playground.Server",
   "BasePath": "_content/discoData-playground.Server",
   "Mode": "Default",
@@ -11,10 +11,10 @@
       "Version": 2,
       "Source": "discodata-playground.client",
       "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishProperties": "",
       "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildProperties": "",
       "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
     }
   ],

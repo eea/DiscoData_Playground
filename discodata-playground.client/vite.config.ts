@@ -58,6 +58,7 @@ export default defineConfig(({ mode }) => {
                 "/getCatalog/": {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => {
                         return path.replace(/^\/getCatalog\/(.+)/, "/api/View/GetCatalog?userAdded=$1");
                     },
@@ -65,6 +66,7 @@ export default defineConfig(({ mode }) => {
                 "/getSchema/": {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => {
                         return path.replace(/^\/getSchema\/(.+)/, "/api/Dremio/GetSchema?origin=$1");
                     },
@@ -72,6 +74,7 @@ export default defineConfig(({ mode }) => {
                 "/getTable/": {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => {
                         return path.replace(/^\/getTable\/(.+)/, "/api/Dremio/GetTable/$1");
                     },
@@ -79,6 +82,7 @@ export default defineConfig(({ mode }) => {
                 "/getColumn/": {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => {
                         return path.replace(/^\/getColumn\/([^\/]+)\/([^\/]+)/, "/api/Dremio/GetColumn/$1/$2");
                     },
@@ -86,21 +90,25 @@ export default defineConfig(({ mode }) => {
                 '/testQuery': {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => path.replace(/^\/testQuery/, '/api/Dremio/testQuery'),
                 },
                 '/createView': {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => path.replace(/^\/createView/, '/api/View/CreateView'),
                 },
                 '/updateView': {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => path.replace(/^\/updateView/, '/api/View/UpdateView'),
                 },
                 '/deleteView': {
                     target: VITE_API_BASE_URL,
                     changeOrigin: true,
+                    secure: false,
                     rewrite: (path) => path.replace(/^\/deleteView\/(.+)/, '/api/View/DeleteView/$1'),
                 },
                 '/chatgpt/streamchat': {
